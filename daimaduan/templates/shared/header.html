@@ -21,7 +21,7 @@
         <input type="text" name="q" placeholder="搜索" class="form-control col-md-10" value="{{ query_string }}" />
       </form>
 
-      <a href="/create" class="btn btn-success navbar-btn share-btn"><span class="plus"></span>分享我的代码</a>
+      <a href="{{ url_for('paste_app.create_paste') }}" class="btn btn-success navbar-btn share-btn"><span class="plus"></span>分享我的代码</a>
 
       <ul class="nav navbar-nav navbar-right">
       {% if current_user.is_authenticated %}

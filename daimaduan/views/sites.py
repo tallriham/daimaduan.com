@@ -10,6 +10,7 @@ from flask_login import logout_user
 from daimaduan.bootstrap import login_manager
 from daimaduan.forms.signin import SigninForm
 from daimaduan.forms.signup import SignupForm
+from daimaduan.models import LoginManagerUser
 from daimaduan.models.base import Code
 from daimaduan.models.base import Paste
 from daimaduan.models.base import User
@@ -21,7 +22,8 @@ from daimaduan.views.users import user_app
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.objects.get_or_404(id=user_id)
+    user = User.objects.get_or_404(id=user_id)
+    return LoginManagerUser(user)
 
 
 site_app = Blueprint("site_app", __name__, template_folder="templates")
@@ -61,7 +63,8 @@ def signin():
     else:
         if form.validate_on_submit():
             user = User.objects.get_or_404(email=form.email.data)
-            login_user(user)
+            user_mixin = LoginManagerUser(user)
+            login_user(user_mixin)
 
         flash('Logged in successfully.')
 

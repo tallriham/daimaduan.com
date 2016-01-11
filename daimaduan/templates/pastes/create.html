@@ -3,8 +3,8 @@
 
 {% block content %}
 {% include 'shared/form_errors.html' %}
-<form class="form-horizontal" action="/create" method="POST" enctype="multipart/form-data">
-  <input type="hidden" name="_csrf_token" value="{{ token }}">
+<form class="form-horizontal" action="{{ url_for('paste_app.create_paste') }}" method="POST" enctype="multipart/form-data">
+  {{ form.csrf_token }}
   <div class="panel panel-default">
     <div class="panel-heading">分享代码</div>
     <div class="panel-body">
@@ -20,6 +20,7 @@
       </div>
       <div id="codes">
         {% for code in form.codes %}
+        {{ code.csrf_token }}
         <div class="well code">
           <div class="form-group">
             {{ code.title.label(class="control-label col-sm-2") }}

@@ -18,12 +18,16 @@ login_manager = LoginManager()
 logging.basicConfig(format='%(levelname)s %(asctime)s %(message)s', level=logging.INFO)
 logger = logging.getLogger('daimaduan')
 
+app = Flask(__name__)
+app.config.from_object('daimaduan.default_settings')
+# app.config.from_envvar('config.cfg')
+db.init_app(app)
+
 from daimaduan.views.sites import site_app
 from daimaduan.views.users import user_app
 from daimaduan.views.pastes import paste_app
 from daimaduan.views.tags import tag_app
 
-app = Flask(__name__)
 app.register_blueprint(site_app)
 app.register_blueprint(user_app, url_prefix='/user')
 app.register_blueprint(paste_app, url_prefix='/paste')
@@ -33,9 +37,6 @@ app.jinja_env.filters['time_passed'] = time_passed
 app.jinja_env.filters['ternary'] = ternary
 app.jinja_env.filters['datetimeformat'] = datetimeformat
 
-app.config.from_object('daimaduan.default_settings')
-# app.config.from_envvar('config.cfg')
-db.init_app(app)
 login_manager.init_app(app)
 
 assets = Environment(app)

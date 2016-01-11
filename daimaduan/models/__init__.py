@@ -2,6 +2,8 @@ import datetime
 import hashlib
 import time
 
+from flask_login import UserMixin
+
 from daimaduan.bootstrap import db
 
 
@@ -43,3 +45,11 @@ class BaseDocument(db.Document):
 
     created_at = db.DateTimeField(default=datetime.datetime.now)
     updated_at = db.DateTimeField(default=datetime.datetime.now)
+
+
+class LoginManagerUser(UserMixin):
+    def __init__(self, user):
+        self.user = user
+        self.id = user.id
+        self.username = user.username
+        self.email = user.email
