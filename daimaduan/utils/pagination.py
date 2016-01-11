@@ -1,6 +1,6 @@
 import math
 
-from bottle import request
+from flask import request
 
 
 def paginate(collection, current_page, per_page=20):
@@ -27,7 +27,7 @@ def get_page():
     if page not given returns `1` instead.
     """
     try:
-        page = request.params.get('page', 1)
+        page = request.args.get('page', 1)
         return int(page)
     except ValueError:
         return 1

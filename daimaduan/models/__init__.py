@@ -1,41 +1,13 @@
-# https://github.com/MongoEngine/flask-mongoengine/blob/master/flask_mongoengine/__init__.py
 import datetime
 import hashlib
 import time
 
-import mongoengine
-from bottle import abort
-from mongoengine.base import ValidationError
-from mongoengine.queryset import DoesNotExist
-from mongoengine.queryset import MultipleObjectsReturned
-from mongoengine.queryset import QuerySet
+from daimaduan.bootstrap import db
 
 
-# https://github.com/MongoEngine/flask-mongoengine/blob/master/flask_mongoengine/__init__.py
-class BaseQuerySet(QuerySet):
-    """
-    A base queryset with handy extras
-    """
-
-    def get_or_404(self, *args, **kwargs):
-        try:
-            return self.get(*args, **kwargs)
-        except (MultipleObjectsReturned, DoesNotExist, ValidationError):
-            abort(404)
-
-    def first_or_404(self):
-
-        obj = self.first()
-        if obj is None:
-            abort(404)
-
-        return obj
-
-
-class BaseDocument(mongoengine.Document):
+class BaseDocument(db.Document):
     meta = {'abstract': True,
-            'strict': False,
-            'queryset_class': BaseQuerySet}
+            'strict': False}
 
     # Increase specific counter by `count`
     def increase_counter(self, field, count=1):
@@ -69,5 +41,5 @@ class BaseDocument(mongoengine.Document):
             while(self.__class__.objects(hash_id=self.hash_id).first() is not None):
                 self.hash_id = generate_hash_id()
 
-    created_at = mongoengine.DateTimeField(default=datetime.datetime.now)
-    updated_at = mongoengine.DateTimeField(default=datetime.datetime.now)
+    created_at = db.DateTimeField(default=datetime.datetime.now)
+    updated_at = db.DateTimeField(default=datetime.datetime.now)
