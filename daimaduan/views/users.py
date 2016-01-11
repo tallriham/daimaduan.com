@@ -110,62 +110,6 @@ def manage():
     pass
 
 
-@user_app.route('/signin', methods=['GET', 'POST'])
-# @jinja2_view('user/signin.html')
-# @csrf_token
-def signin_get():
-    if request.method == 'GET':
-    # if request.user:
-    #     redirect('/')
-    # else:
-    #     return {'form': SigninForm(), 'token': request.csrf_token}
-        pass
-    else:
-        # session = get_session(request)
-        #
-        # form = SigninForm(request.POST)
-        # if form.validate():
-        #     login.login_user(str(form.user.id))
-        #
-        #     if 'oauth_provider' in session:
-        #         user_bind_oauth(form.user, session)
-        #
-        #     redirect('/')
-        # else:
-        #     return locals()
-        pass
-
-
-@user_app.route('/signout', methods=['DELETE'])
-def signout_delete():
-    # login.logout_user()
-    # request.environ.get('beaker.session').delete()
-    pass
-
-
-@user_app.route('/signup', methods=['GET', 'POST'])
-# @jinja2_view('user/signup.html')
-# @csrf_token
-def signup_get():
-    if request.method == 'GET':
-    #     if request.user:
-    #         redirect('/')
-    #     else:
-    #         return {'form': SignupForm(), 'token': request.csrf_token}
-        pass
-    else:
-        # form = SignupForm(request.forms)
-        # if form.validate():
-        #     user = User()
-        #     form.populate_obj(user)
-        #     user.save()
-        #     login.login_user(user.id)
-        #     send_confirm_email(app.config, user.email)
-        #     return redirect('/active_email')
-        # return {'form': form, 'token': request.csrf_token}
-        pass
-
-
 @user_app.route('/lost_password', methods=['GET', 'POST'])
 # @jinja2_view('user/lost_password.html')
 def lost_password_get():

@@ -18,18 +18,6 @@ def get_paste(hash_id):
     return Paste.objects.get_or_404(hash_id=hash_id)
 
 
-@paste_app.route('/', methods=['GET'])
-def index():
-    page = get_page()
-    pastes = Paste.objects(is_private=False).order_by('-updated_at')
-    pastes, summary = paginate(pastes, page)
-
-    return render_template('index.html',
-                           pastes=pastes,
-                           page_summary=summary,
-                           tags=Tag.objects().order_by('-popularity')[:10])
-
-
 # def get_pastes_from_search(p=1):
 #     query_string = request.query.q
 #

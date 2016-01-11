@@ -2,6 +2,9 @@ Beaker==1.7.0
 flask==0.10.1
 flask-mongoengine==0.7.5
 Flask-Assets==0.11
+Flask-OAuth==0.12
+flask-login==0.3.2
+Flask-Gravatar==0.4.2
 cssmin==0.2.0
 git+https://github.com/greatghoul/bottle-login.git#egg=bottle-login
 ecdsa==0.13

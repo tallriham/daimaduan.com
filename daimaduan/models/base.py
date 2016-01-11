@@ -3,6 +3,7 @@ import hashlib
 import time
 
 from bottle import request
+from flask_login import UserMixin
 from mongoengine import signals
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -15,7 +16,7 @@ from daimaduan.models.like import Like
 from daimaduan.models.user_oauth import UserOauth
 
 
-class User(BaseDocument):
+class User(BaseDocument, UserMixin):
     username = db.StringField(required=True)
     email = db.StringField(required=True)
     password = db.StringField()

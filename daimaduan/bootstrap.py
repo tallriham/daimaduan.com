@@ -2,39 +2,39 @@
 import logging
 
 from flask import Flask
-from flask.ext.mongoengine import MongoEngine
-from flask.ext.assets import Environment
-from flask.ext.assets import Bundle
+from flask_gravatar import Gravatar
+from flask_mongoengine import MongoEngine
+from flask_assets import Environment
+from flask_assets import Bundle
+from flask_oauth import OAuth
+from flask_login import LoginManager
 from daimaduan.utils.filters import datetimeformat
 from daimaduan.utils.filters import time_passed
 from daimaduan.utils.filters import ternary
 
-
 db = MongoEngine()
-
-# def get_current_path():
-#     file_name = os.path.dirname(__file__)
-#     return os.path.abspath(file_name)
-from daimaduan.views.pastes import paste_app
-from daimaduan.views.users import user_app
+login_manager = LoginManager()
 
 logging.basicConfig(format='%(levelname)s %(asctime)s %(message)s', level=logging.INFO)
 logger = logging.getLogger('daimaduan')
 
+from daimaduan.views.sites import site_app
+from daimaduan.views.pastes import paste_app
+from daimaduan.views.users import user_app
 
 app = Flask(__name__)
+app.register_blueprint(site_app)
 app.register_blueprint(user_app, url_prefix='/user')
 app.register_blueprint(paste_app, url_prefix='/paste')
-
-app.config['MONGODB_SETTINGS'] = {
-    'db': 'daimaduan',
-    'host': '192.168.99.100'
-}
-db.init_app(app)
 
 app.jinja_env.filters['time_passed'] = time_passed
 app.jinja_env.filters['ternary'] = ternary
 app.jinja_env.filters['datetimeformat'] = datetimeformat
+
+app.config.from_object('daimaduan.default_settings')
+# app.config.from_envvar('config.cfg')
+db.init_app(app)
+login_manager.init_app(app)
 
 assets = Environment(app)
 js = Bundle('js/app.js',
@@ -54,6 +54,16 @@ css = Bundle('css/app.css',
              filters='cssmin', output='css/compiled.css')
 assets.register('css_all', css)
 
+oauth = OAuth()
+
+gravatar = Gravatar(app,
+                    size=100,
+                    rating='g',
+                    default='retro',
+                    force_default=False,
+                    force_lower=False,
+                    use_ssl=True,
+                    base_url=None)
 # app.config.load_config('%s/config.cfg' % get_current_path())
 # # Check if there's a key in env variables
 # # if you want to set config on the fly, use env var
@@ -63,13 +73,6 @@ assets.register('css_all', css)
 #     if k in os.environ:
 #         app.config[key] = os.environ[k]
 # app.config['SECRET_KEY'] = app.config['site.validate_key']
-
-# jinja = JinajaPlugin(template_path='%s/templates' % get_current_path())
-# login = LoginPlugin()
-#
-# app.install(login)
-# app.install(jinja)
-# app.install(MongoenginePlugin())
 #
 # oauth_services = {}
 # oauth_services['google'] = OAuth2Service(**oauth_config(app.config, 'google'))
