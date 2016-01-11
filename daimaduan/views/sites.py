@@ -39,6 +39,12 @@ def index():
                            tags=Tag.objects().order_by('-popularity')[:10])
 
 
+@site_app.route('/tags', methods=['GET'])
+def tags():
+    return render_template('tags/index.html',
+                           tags=Tag.objects().order_by('-popularity'))
+
+
 @site_app.route('/status', methods=['GET'])
 def status():
     return {'pastes_count': Paste.objects().count(),

@@ -228,34 +228,6 @@ def view(hash_id):
 #     return {'paste': paste}
 #
 #
-# @app.route('/tags', name='tags.index')
-# @jinja2_view('tags/index.html')
-# def tags():
-#     return {'tags': Tag.objects().order_by('-popularity')}
-#
-#
-# @app.route('/tag/<tag_name>', name='tags.show')
-# @jinja2_view('tags/view.html')
-# def tag(tag_name):
-#     tag = Tag.objects.get_or_404(name=tag_name)
-#     page = get_page()
-#
-#     pastes = tag.pastes(is_private=False).order_by('-updated_at')
-#     pastes, summary = paginate(pastes, page)
-#
-#     return {'tag': tag,
-#             'pastes': pastes,
-#             'page_summary': summary}
-#
-#
-# @app.route('/tag/<tag_name>/more')
-# @jinja2_view('pastes/pastes.html')
-# def tag_more(tag_name):
-#     p = int(request.query.p)
-#     if not p:
-#         return {}
-#     return {'pastes': Paste.objects(tags=tag_name, is_private=False).order_by('-updated_at')[(p - 1) * ITEMS_PER_PAGE:p * ITEMS_PER_PAGE]}
-#
 #
 # @app.route('/favourite/<hash_id>', name='favourites.add')
 # def favourites_add(hash_id):
