@@ -1,12 +1,15 @@
 # coding: utf-8
+import base64
+import hashlib
+import hmac
+import json
+import time
 
+from flask import config
 from flask import render_template, Blueprint
+from flask_login import current_user
 
 from daimaduan.models.base import Paste
-from daimaduan.models.tag import Tag
-from daimaduan.utils.pagination import get_page
-from daimaduan.utils.pagination import paginate
-
 
 ITEMS_PER_PAGE = 20
 
@@ -109,25 +112,27 @@ def get_paste(hash_id):
 #     return {'form': form, 'token': request.csrf_token}
 #
 #
-# @app.route('/paste/<hash_id>', name='pastes.show')
-# @jinja2_view('pastes/view.html')
-# def view(hash_id):
-#     paste = get_paste(hash_id)
-#     paste.increase_views()
-#
-#     sig = message = timestamp = None
-#     user = login.get_user()
-#     if user:
-#         # create a JSON packet of our data attributes
-#         data = json.dumps({'id': str(user.id), 'username': user.username, 'email': user.email})
-#         # encode the data to base64
-#         message = base64.b64encode(data)
-#         # generate a timestamp for signing the message
-#         timestamp = int(time.time())
-#         # generate our hmac signature
-#         sig = hmac.HMAC(app.config['site.disqus_secret_key'], '%s %s' % (message, timestamp), hashlib.sha1).hexdigest()
-#
-#     return {'paste': paste, 'message': message, 'timestamp': timestamp, 'sig': sig}
+@paste_app.route('/<hash_id>', methods=['GET'])
+def view(hash_id):
+    paste =Paste.objects.get_or_404(hash_id=hash_id)
+    paste.increase_views()
+
+    sig = message = timestamp = None
+    if current_user.is_authenticated:
+        # create a JSON packet of our data attributes
+        data = json.dumps({'id': str(current_user.id), 'username': current_user.username, 'email': current_user.email})
+        # encode the data to base64
+        message = base64.b64encode(data)
+        # generate a timestamp for signing the message
+        timestamp = int(time.time())
+        # generate our hmac signature
+        sig = hmac.HMAC(config['disqus']['secret_key'], '%s %s' % (message, timestamp), hashlib.sha1).hexdigest()
+
+    return render_template('pastes/view.html',
+                           paste=paste,
+                           message=message,
+                           timestamp=timestamp,
+                           sig=sig)
 #
 #
 # @app.post('/paste/<hash_id>/like')

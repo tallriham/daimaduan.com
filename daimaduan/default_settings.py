@@ -6,3 +6,7 @@ MONGODB_SETTINGS = {
 }
 
 SECRET_KEY = 'Youshouldnotknowthis'
+
+disqus = {
+    'secret_key': 'sdgsadg'
+}

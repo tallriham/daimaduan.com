@@ -19,8 +19,8 @@ logging.basicConfig(format='%(levelname)s %(asctime)s %(message)s', level=loggin
 logger = logging.getLogger('daimaduan')
 
 from daimaduan.views.sites import site_app
-from daimaduan.views.pastes import paste_app
 from daimaduan.views.users import user_app
+from daimaduan.views.pastes import paste_app
 
 app = Flask(__name__)
 app.register_blueprint(site_app)
