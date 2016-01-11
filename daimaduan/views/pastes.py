@@ -142,8 +142,8 @@ def like(hash_id):
 @paste_app.route('/<hash_id>/unlike', methods=['POST'])
 @login_required
 def unlike(hash_id):
-     paste = get_paste(hash_id)
-     return paste.toggle_like_by(request.user, False)
+    paste = get_paste(hash_id)
+    return paste.toggle_like_by(request.user, False)
 
 
 @paste_app.route('/<hash_id>/edit', methods=['GET', 'POST'])

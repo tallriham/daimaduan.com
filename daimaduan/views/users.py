@@ -1,35 +1,17 @@
 # coding: utf-8
-from flask import Blueprint
+from flask import Blueprint, render_template
+from flask import request
 
-# from daimaduan.bootstrap import login
-# from daimaduan.bootstrap import oauth_services
-# from daimaduan.forms.email import EmailForm
-# from daimaduan.forms.password import PasswordForm
-# from daimaduan.forms.signin import SigninForm
-# from daimaduan.forms.signup import SignupForm
-# from daimaduan.forms.userinfo import UserInfoForm
-# from daimaduan.models.tag import Tag
-# from daimaduan.models.base import User
-# from daimaduan.models.user_oauth import UserOauth
-# from daimaduan.utils.commons import get_session
-# from daimaduan.utils.email_confirmation import send_confirm_email
-# from daimaduan.utils.email_confirmation import send_reset_password_email
-# from daimaduan.utils.email_confirmation import validate_token
-# from daimaduan.utils.oauth import user_bind_oauth
-# from daimaduan.utils.pagination import get_page, paginate
+from flask_login import current_user
 
+from daimaduan.models.base import User
+from daimaduan.models.tag import Tag
+from daimaduan.utils.pagination import paginate, get_page
 
 user_app = Blueprint("user_app", __name__, template_folder="templates")
 
-# Get user by username or raise 404 error.
-# def get_user(username):
-#     return User.objects.get_or_404(username=username)
-
 
 @user_app.route('/user/manage', methods=['POST'])
-# @jinja2_view('user/manage.html')
-# @csrf_token
-# @csrf_protect
 def manage():
     # form = UserInfoForm(request.forms)
     # if form.validate():
@@ -49,54 +31,50 @@ def manage():
     pass
 
 
-@user_app.route('/user/<username>', methods=['GET'])
-# @jinja2_view('user/user.html')
+@user_app.route('/<username>', methods=['GET'])
 def user_index(username):
-    # page = get_page()
-    # user = get_user(username)
-    #
-    # pastes = user.pastes.order_by('-updated_at')
-    # if not (request.user and request.user == user):
-    #     pastes = pastes(is_private=False)
-    #
-    # pastes, summary = paginate(pastes, page)
-    #
-    # return {'user': user,
-    #         'pastes': pastes,
-    #         'page_summary': summary,
-    #         'tags': Tag.objects().order_by('-popularity')[:10]}
-    pass
+    page = get_page()
+    user = User.objects.get_or_404(username=username)
+
+    pastes = user.pastes.order_by('-updated_at')
+    if not (current_user.is_authenticated and current_user.user == user):
+        pastes = pastes(is_private=False)
+
+    pastes, summary = paginate(pastes, page)
+
+    return render_template('user/user.html',
+                           user=user,
+                           pastes=pastes,
+                           page_summary=summary,
+                           tags=Tag.objects().order_by('-popularity')[:10])
 
 
-@user_app.route('/user/<username>/likes', methods=['GET'])
-# @jinja2_view('user/likes.html')
+@user_app.route('/<username>/likes', methods=['GET'])
 def likes_get(username):
-    # user = get_user(username)
-    #
-    # page = get_page()
-    # likes = user.likes.order_by('-updated_at')
-    # likes, summary = paginate(likes, page)
-    #
-    # return {'user': user,
-    #         'likes': likes,
-    #         'page_summary': summary,
-    #         'tags': Tag.objects().order_by('-popularity')[:10]}
-    pass
+    user = User.objects.get_or_404(username=username)
+
+    page = get_page()
+    likes = user.likes.order_by('-updated_at')
+    likes, summary = paginate(likes, page)
+
+    return render_template('user/likes.html',
+                           user=user,
+                           likes=likes,
+                           page_summary=summary,
+                           tags=Tag.objects().order_by('-popularity')[:10])
 
 
 @user_app.route('/user/watch', methods=['POST'])
 def watch_user():
-    # user = User.objects(username=request.params.get('user')).first_or_404()
-    # request.user.watched_users.append(user)
-    # request.user.save()
-    # return {'watchedStatus': request.user.is_watched(user)}
-    pass
+    user = User.objects(username=request.args.get('user')).first_or_404()
+    current_user.user.watched_users.append(user)
+    current_user.user.save()
+    return {'watchedStatus': current_user.user.is_watched(user)}
 
 
 @user_app.route('/user/unwatch', methods=['POST'])
 def unwatch_user():
-    # user = User.objects(username=request.params.get('user')).first_or_404()
-    # request.user.watched_users.remove(user)
-    # request.user.save()
-    # return {'watchedStatus': request.user.is_watched(user)}
-    pass
+    user = User.objects(username=request.params.get('user')).first_or_404()
+    current_user.user.watched_users.remove(user)
+    current_user.user.save()
+    return {'watchedStatus': request.user.is_watched(user)}
