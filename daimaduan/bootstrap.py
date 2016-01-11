@@ -39,21 +39,22 @@ db.init_app(app)
 login_manager.init_app(app)
 
 assets = Environment(app)
+assets.debug = True
 js = Bundle('js/app.js',
             'js/errors.js',
-            'js/highlightjs.line.numbers.min.js',
             'js/pastes.js',
             'js/tags.js',
             'js/users.js',
+            'js/highlightjs.line.numbers.min.js',
             filters='uglifyjs', output='js/compiled.js')
 assets.register('js_all', js)
 
-css = Bundle('css/app.css',
-             'css/errors.css',
-             'css/pastes.css',
-             'css/tags.css',
-             'css/users.css',
-             filters='cssmin', output='css/compiled.css')
+css = Bundle('css/app.scss',
+             'css/pastes.scss',
+             # 'css/tags.scss',
+             # 'css/users.scss',
+             'css/embed.scss',
+             filters='scss,cssmin', output='css/compiled.css')
 assets.register('css_all', css)
 
 oauth = OAuth()

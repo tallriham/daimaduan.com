@@ -2,7 +2,7 @@
 import hashlib
 import time
 
-from bottle import request
+from flask import request
 from flask_login import UserMixin
 from mongoengine import signals
 from pygments import highlight
