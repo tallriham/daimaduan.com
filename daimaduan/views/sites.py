@@ -1,5 +1,5 @@
 # coding: utf-8
-from flask import Blueprint, flash, request
+from flask import Blueprint, flash
 from flask import redirect
 from flask import render_template
 from flask import request

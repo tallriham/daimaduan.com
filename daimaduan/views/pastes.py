@@ -16,6 +16,7 @@ ITEMS_PER_PAGE = 20
 
 paste_app = Blueprint("paste_app", __name__, template_folder="templates")
 
+
 # Get paste by hash id or raise 404 error.
 def get_paste(hash_id):
     return Paste.objects.get_or_404(hash_id=hash_id)
@@ -114,7 +115,7 @@ def get_paste(hash_id):
 #
 @paste_app.route('/<hash_id>', methods=['GET'])
 def view(hash_id):
-    paste =Paste.objects.get_or_404(hash_id=hash_id)
+    paste = Paste.objects.get_or_404(hash_id=hash_id)
     paste.increase_views()
 
     sig = message = timestamp = None
