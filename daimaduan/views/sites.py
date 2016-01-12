@@ -1,4 +1,7 @@
 # coding: utf-8
+import re
+
+from flask import abort
 from flask import Blueprint, flash
 from flask import redirect
 from flask import render_template
@@ -17,7 +20,7 @@ from daimaduan.models.base import User
 from daimaduan.models.tag import Tag
 from daimaduan.utils.pagination import get_page
 from daimaduan.utils.pagination import paginate
-from daimaduan.views.users import user_app
+from daimaduan.views.pastes import ITEMS_PER_PAGE
 
 
 @login_manager.user_loader
@@ -32,12 +35,10 @@ site_app = Blueprint("site_app", __name__, template_folder="templates")
 @site_app.route('/', methods=['GET'])
 def index():
     page = get_page()
-    pastes = Paste.objects(is_private=False).order_by('-updated_at')
-    pastes, summary = paginate(pastes, page)
+    pagination = Paste.objects(is_private=False).order_by('-updated_at').paginate(page=page, per_page=20)
 
     return render_template('index.html',
-                           pastes=pastes,
-                           page_summary=summary,
+                           pagination=pagination,
                            tags=Tag.objects().order_by('-popularity')[:10])
 
 
@@ -95,7 +96,7 @@ def signup():
                                form=form)
 
 
-@user_app.route('/oauth/<provider>', methods=['GET'])
+@site_app.route('/oauth/<provider>', methods=['GET'])
 def oauth_signin(provider):
     # oauth_service = oauth_services[provider]
     # redirect_uri = app.config['oauth.%s.callback_url' % provider]
@@ -108,7 +109,7 @@ def oauth_signin(provider):
     pass
 
 
-@user_app.route('/oauth/<provider>/callback', methods=['GET'])
+@site_app.route('/oauth/<provider>/callback', methods=['GET'])
 # @jinja2_view('user/manage.html')
 # @csrf_token
 def oauth_callback(provider):
@@ -155,7 +156,7 @@ def oauth_callback(provider):
     pass
 
 
-@user_app.route('/lost_password', methods=['GET', 'POST'])
+@site_app.route('/lost_password', methods=['GET', 'POST'])
 # @jinja2_view('user/lost_password.html')
 def lost_password_get():
     if request.method == 'GET':
@@ -171,14 +172,14 @@ def lost_password_get():
         pass
 
 
-@user_app.route('/reset_password_email_sent', methods=['GET'])
+@site_app.route('/reset_password_email_sent', methods=['GET'])
 # @jinja2_view('error.html')
 def reset_password_email_sent():
     # return {'title': u"重置密码的邮件已经发出", 'message': u"重置密码的邮件已经发出, 请查收邮件并重置密码"}
     pass
 
 
-@user_app.route('/reset_password/<token>', methods=['GET', 'POST'])
+@site_app.route('/reset_password/<token>', methods=['GET', 'POST'])
 # @jinja2_view('user/reset_password.html')
 def reset_password(token):
     if request.method == 'GET':
@@ -204,14 +205,14 @@ def reset_password(token):
         pass
 
 
-@user_app.route('/reset_password_success', methods=['GET'])
+@site_app.route('/reset_password_success', methods=['GET'])
 # @jinja2_view('error.html')
 def reset_password_success():
     # return {'title': u"重置密码成功", 'message': u"您的密码已经重置, 请重新登录"}
     pass
 
 
-@user_app.route('/confirm/<token>', methods=['GET'])
+@site_app.route('/confirm/<token>', methods=['GET'])
 # @jinja2_view('email/confirm.html')
 def confirm_email(token):
     # email = validate_token(app.config, token)
@@ -230,7 +231,7 @@ def confirm_email(token):
     pass
 
 
-@user_app.route('/active_email', methods=['GET'])
+@site_app.route('/active_email', methods=['GET'])
 # @csrf_token
 # @jinja2_view('email/active.html')
 def active_email():
@@ -238,14 +239,14 @@ def active_email():
     pass
 
 
-@user_app.route('/success_sendmail', methods=['GET'])
+@site_app.route('/success_sendmail', methods=['GET'])
 # @jinja2_view('email/confirm.html')
 def sendmail_success():
     # return {'title': u"激活邮件发送成功", 'message': u"激活邮件发送成功, 请检查并激活您的账户。"}
     pass
 
 
-@user_app.route('/sendmail', methods=['POST'])
+@site_app.route('/sendmail', methods=['POST'])
 # @csrf_protect
 def send_mail_post():
     # form = EmailForm(request.forms)
@@ -255,3 +256,39 @@ def send_mail_post():
     #     return redirect('/success_sendmail')
     # return {'form': form}
     pass
+
+
+def get_pastes_from_search(query_string, p=1):
+    def get_string_by_keyword(keyword, query_string):
+        string = ''
+        result = re.search('\s*%s:([a-zA-Z+-_#]+)\s*' % keyword, query_string)
+        if result:
+            if len(result.groups()) == 1:
+                string = result.groups()[0]
+        query_string = query_string.replace('%s:%s' % (keyword, string), '')
+        return string, query_string
+
+    tag, query_string = get_string_by_keyword('tag', query_string)
+    user, query_string = get_string_by_keyword('user', query_string)
+    keyword = query_string.strip()
+
+    criteria = {'title__contains': keyword, 'is_private': False}
+    if tag:
+        criteria['tags'] = tag
+    if user:
+        user_object = User.objects(username=user).first()
+        if user_object:
+            criteria['user'] = user_object
+
+    return keyword, Paste.objects(**criteria).order_by('-updated_at').paginate(p, per_page=2)
+
+
+@site_app.route('/search', methods=['GET'])
+def search_paste():
+    page = get_page()
+    q = request.args['q']
+    keyword, pagination = get_pastes_from_search(q, p=page)
+    return render_template('search.html',
+                           query_string=q,
+                           keyword=keyword,
+                           pagination=pagination)

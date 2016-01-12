@@ -5,7 +5,6 @@ import hmac
 import json
 import time
 
-from daimaduan.forms.paste import PasteForm
 from flask import abort
 from flask import current_app, request
 from flask import make_response
@@ -13,6 +12,7 @@ from flask import redirect
 from flask import render_template, Blueprint
 from flask_login import current_user, login_required
 
+from daimaduan.forms.paste import PasteForm
 from daimaduan.models.base import Paste, Code
 from daimaduan.models.tag import Tag
 
@@ -22,57 +22,6 @@ ITEMS_PER_PAGE = 20
 paste_app = Blueprint("paste_app", __name__, template_folder="templates")
 
 
-# Get paste by hash id or raise 404 error.
-def get_paste(hash_id):
-    return Paste.objects.get_or_404(hash_id=hash_id)
-
-
-# def get_pastes_from_search(p=1):
-#     query_string = request.query.q
-#
-#     def get_string_by_keyword(keyword, query_string):
-#         string = ''
-#         result = re.search('\s*%s:([a-zA-Z+-_#]+)\s*' % keyword, query_string)
-#         if result:
-#             if len(result.groups()) == 1:
-#                 string = result.groups()[0]
-#         query_string = query_string.replace('%s:%s' % (keyword, string), '')
-#         return string, query_string
-#
-#     tag, query_string = get_string_by_keyword('tag', query_string)
-#     user, query_string = get_string_by_keyword('user', query_string)
-#     keyword = query_string.strip()
-#
-#     criteria = {'title__contains': keyword, 'is_private': False}
-#     if tag:
-#         criteria['tags'] = tag
-#     if user:
-#         user_object = User.objects(username=user).first()
-#         criteria['user'] = user_object
-#
-#     return keyword, Paste.objects(**criteria).order_by('-updated_at')[(p - 1) * ITEMS_PER_PAGE:p * ITEMS_PER_PAGE]
-#
-#
-# @app.get('/search', name='pastes.search')
-# @jinja2_view('search.html')
-# def search_get():
-#     keyword, pastes = get_pastes_from_search()
-#     return {'query_string': request.query.q,
-#             'keyword': keyword,
-#             'pastes': pastes}
-#
-#
-# @app.get('/search_more')
-# @jinja2_view('pastes/pastes.html')
-# def search_post():
-#     p = int(request.query.p)
-#     if not p:
-#         p = 2
-#
-#     keyword, pastes = get_pastes_from_search(p=p)
-#     return {'pastes': pastes}
-#
-#
 @paste_app.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_paste():
@@ -135,21 +84,21 @@ def view_paste(hash_id):
 @paste_app.route('/<hash_id>/like', methods=['POST'])
 @login_required
 def like(hash_id):
-    paste = get_paste(hash_id)
+    paste = Paste.objects.get_or_404(hash_id=hash_id)
     return paste.toggle_like_by(request.user, True)
 
 
 @paste_app.route('/<hash_id>/unlike', methods=['POST'])
 @login_required
 def unlike(hash_id):
-    paste = get_paste(hash_id)
+    paste = Paste.objects.get_or_404(hash_id=hash_id)
     return paste.toggle_like_by(request.user, False)
 
 
 @paste_app.route('/<hash_id>/edit', methods=['GET', 'POST'])
 @login_required
-def edit_get(hash_id):
-    paste = get_paste(hash_id)
+def edit_paste(hash_id):
+    paste = Paste.objects.get_or_404(hash_id=hash_id)
     if not paste.is_user_owned(request.user):
         abort(404)
     if request.method == 'GET':
@@ -198,7 +147,7 @@ def edit_get(hash_id):
 @paste_app.route('/<hash_id>/delete', methods=['POST'])
 @login_required
 def delete(hash_id):
-    paste = get_paste(hash_id)
+    paste = Paste.objects.get_or_404(hash_id=hash_id)
 
     if current_user.owns_record(paste):
         paste.delete()
@@ -209,7 +158,7 @@ def delete(hash_id):
 
 @paste_app.route('/<hash_id>/embed.js', methods=['GET'])
 def embed_js(hash_id):
-    paste = get_paste(hash_id)
+    paste = Paste.objects.get_or_404(hash_id=hash_id)
 
     resp = make_response(render_template('paste/embed.js', paste=paste), 200)
     resp.headers['Content-Type'] = 'text/javascript; charset=utf-8'

@@ -32,7 +32,7 @@ def manage():
 
 
 @user_app.route('/<username>', methods=['GET'])
-def user_index(username):
+def view_user(username):
     page = get_page()
     user = User.objects.get_or_404(username=username)
 
@@ -40,27 +40,25 @@ def user_index(username):
     if not (current_user.is_authenticated and current_user.user == user):
         pastes = pastes(is_private=False)
 
-    pastes, summary = paginate(pastes, page)
+    pagination = pastes.paginate(page, per_page=20)
 
     return render_template('user/user.html',
                            user=user,
-                           pastes=pastes,
-                           page_summary=summary,
+                           pagination=pagination,
                            tags=Tag.objects().order_by('-popularity')[:10])
 
 
 @user_app.route('/<username>/likes', methods=['GET'])
-def likes_get(username):
+def view_likes(username):
     user = User.objects.get_or_404(username=username)
 
     page = get_page()
     likes = user.likes.order_by('-updated_at')
-    likes, summary = paginate(likes, page)
+    pagination = likes.paginate(page, per_page=20)
 
     return render_template('user/likes.html',
                            user=user,
-                           likes=likes,
-                           page_summary=summary,
+                           pagination=pagination,
                            tags=Tag.objects().order_by('-popularity')[:10])
 
 
